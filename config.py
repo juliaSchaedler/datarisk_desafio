@@ -1,27 +1,24 @@
-import lightgbm as lgb
-#import optuna
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score
-from config import LGBM_FIXED_PARAMS, OPTUNA_TRIALS
+"""
+Arquivo de configuração central para o projeto.
+"""
 
+# Caminhos
+DATA_PATH = 'data/'
+OUTPUT_PATH = 'output/'
+SUBMISSION_FILE = 'submissao_case.csv'
 
-def train_model_on_fold(X_train, y_train, X_valid, y_valid, params):
-    """Treina e avalia um modelo em um único fold da validação cruzada."""
-    model = lgb.LGBMClassifier(**params)
-    model.fit(X_train, y_train,
-              eval_set=[(X_valid, y_valid)],
-              eval_metric='auc',
-              callbacks=[lgb.early_stopping(50, verbose=False)])
-    
-    valid_preds = model.predict_proba(X_valid)[:, 1]
-    return roc_auc_score(y_valid, valid_preds), model
+# Constantes do Modelo
+ID_COLS = ['ID_CLIENTE', 'SAFRA_REF']
+TARGET = 'INADIMPLENTE'
 
-def train_final_model(X, y, params):
-    """Treina o modelo final com todos os dados."""
-    print("\n--- Treinando Modelo Final com Todos os Dados ---")
-    final_params = params.copy()
-    final_params['n_estimators'] = 3000 
-    
-    model = lgb.LGBMClassifier(**final_params)
-    model.fit(X, y)
-    return model
+# Parâmetros de Otimização e Modelo
+#OPTUNA_TRIALS = 25  # Número de tentativas para o Optuna. Aumente para uma busca melhor.
+LGBM_FIXED_PARAMS = {
+    'objective': 'binary',
+    'metric': 'auc',
+    'boosting_type': 'gbdt',
+    'n_estimators': 2000,
+    'seed': 42,
+    'n_jobs': -1,
+    'verbose': -1,
+}
